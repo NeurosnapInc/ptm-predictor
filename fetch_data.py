@@ -64,6 +64,7 @@ for fname in os.listdir(INPUTS_RAW_DIR):
     continue
 
   df = pd.read_csv(fpath_in, sep="\t", names=["name", "uniprot", "ptm_location", "ptm_name", "unknown_stupid", "adjacent_seq"])
+  df.uniprot = df.uniprot.str.strip()
   logger.info(f"Processing raw file {fname} ({len(df)} entries)")
   full_seqs = []
   accessions = fetch_accessions(df.uniprot)
