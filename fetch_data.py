@@ -52,8 +52,7 @@ if not os.path.exists(INPUTS_CLEAN_DIR):
   download_raw()
 
 # create clean directory
-shutil.rmtree(INPUTS_CLEAN_DIR, ignore_errors=True)
-os.makedirs(INPUTS_CLEAN_DIR)
+os.makedirs(INPUTS_CLEAN_DIR, exist_ok=True)
 
 ## process each raw TSV file
 # add full uniprot sequences to each dataframe
@@ -61,6 +60,9 @@ for fname in os.listdir(INPUTS_RAW_DIR):
   logger.info(f"Processing raw file {fname}")
   fpath_in = os.path.join(INPUTS_RAW_DIR, fname)
   fpath_out = os.path.join(INPUTS_CLEAN_DIR, fname + ".csv")
+  if os.path.exists(fpath_out): # skip finished files
+    continue
+
   df = pd.read_csv(fpath_in, sep="\t", names=["name", "uniprot", "ptm_location", "ptm_name", "unknown_stupid", "adjacent_seq"])
   full_seqs = []
   for _, row in tqdm(df.iterrows()):
