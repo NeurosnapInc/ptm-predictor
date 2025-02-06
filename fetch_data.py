@@ -1,18 +1,17 @@
 import os
 import shutil
 import tarfile
-from time import sleep
 
 import bs4
 import pandas as pd
 import requests
 from neurosnap.log import logger
-from neurosnap.protein import fetch_uniprot
-from tqdm import tqdm
+from neurosnap.protein import fetch_accessions
 
 ### Constants
 INPUTS_RAW_DIR = "ptms_raw"
 INPUTS_CLEAN_DIR = "ptms_clean"
+
 
 ### Functions
 def download_raw():
@@ -45,6 +44,7 @@ def download_raw():
 
       os.remove(tgz_path)
 
+
 ### Core Program
 ## prepare directories
 # create raw files directory if it hasn't been fully downloaded yet
@@ -57,20 +57,18 @@ os.makedirs(INPUTS_CLEAN_DIR, exist_ok=True)
 ## process each raw TSV file
 # add full uniprot sequences to each dataframe
 for fname in os.listdir(INPUTS_RAW_DIR):
-  logger.info(f"Processing raw file {fname}")
   fpath_in = os.path.join(INPUTS_RAW_DIR, fname)
   fpath_out = os.path.join(INPUTS_CLEAN_DIR, fname + ".csv")
-  if os.path.exists(fpath_out): # skip finished files
+  if os.path.exists(fpath_out):  # skip finished files
+    logger.info(f"Processing raw file {fname} (skipping)")
     continue
 
   df = pd.read_csv(fpath_in, sep="\t", names=["name", "uniprot", "ptm_location", "ptm_name", "unknown_stupid", "adjacent_seq"])
+  logger.info(f"Processing raw file {fname} ({len(df)} entries)")
   full_seqs = []
-  for _, row in tqdm(df.iterrows()):
-    for _ in range(50):
-      try:
-        full_seqs.append(fetch_uniprot(row.uniprot))
-        break
-      except:
-        sleep(5)
+  accessions = fetch_accessions(df.uniprot)
+  for _, row in df.iterrows():
+    full_seqs.append(accessions[row.uniprot])
+
   df["seq"] = full_seqs
   df.to_csv(fpath_out, index=False)
