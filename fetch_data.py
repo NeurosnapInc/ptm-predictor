@@ -8,6 +8,7 @@ import requests
 from neurosnap.log import logger
 from neurosnap.protein import fetch_accessions
 
+
 ### Constants
 INPUTS_RAW_DIR = "ptms_raw"
 INPUTS_CLEAN_DIR = "ptms_clean"
