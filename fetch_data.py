@@ -1,3 +1,37 @@
+"""
+This script automates the download, extraction, and preprocessing of PTM (Post-Translational Modification) datasets
+from the dbPTM database hosted by NYCU. The data is fetched as raw TSV files inside `.tgz` archives, then processed
+into cleaned CSV files that include full UniProt protein sequences for each PTM entry.
+
+Main Steps:
+1. **Download Raw Data**:
+   - Connects to the dbPTM download page.
+   - Identifies and downloads `.tgz` archives for each PTM dataset (Linux/Mac versions).
+   - Extracts the contents into the `ptms_raw/` directory.
+
+2. **Preprocess and Format**:
+   - Iterates through each raw TSV file.
+   - Cleans whitespace from UniProt IDs.
+   - Fetches full protein sequences for each UniProt accession using `fetch_accessions`.
+   - Appends the sequence as a new column (`seq`) in the DataFrame.
+   - Saves the result as a CSV file in the `ptms_clean/` directory.
+
+Requirements:
+- `bs4`, `requests`, `pandas`
+- Custom modules: `neurosnap.log.logger` and `neurosnap.protein.fetch_accessions`
+
+Directory Structure:
+- `ptms_raw/` – Temporary directory for raw TSV files (created from downloaded archives).
+- `ptms_clean/` – Final output directory for cleaned and enriched CSV files.
+
+Usage:
+Run this script directly. It will skip already-processed files to avoid redundant work.
+
+Note:
+- This script assumes consistent structure in the dbPTM HTML and TSV file formatting.
+- All TSVs are expected to use tab separation and contain six columns.
+"""
+
 import os
 import shutil
 import tarfile
