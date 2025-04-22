@@ -16,10 +16,6 @@ Main Steps:
    - Appends the sequence as a new column (`seq`) in the DataFrame.
    - Saves the result as a CSV file in the `ptms_clean/` directory.
 
-Requirements:
-- `bs4`, `requests`, `pandas`
-- Custom modules: `neurosnap.log.logger` and `neurosnap.protein.fetch_accessions`
-
 Directory Structure:
 - `ptms_raw/` – Temporary directory for raw TSV files (created from downloaded archives).
 - `ptms_clean/` – Final output directory for cleaned and enriched CSV files.
