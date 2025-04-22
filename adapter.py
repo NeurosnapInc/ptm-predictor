@@ -10,11 +10,16 @@ batch_converter = alphabet.get_batch_converter()
 
 # Define an Adapter module
 class Adapter(nn.Module):
-  def __init__(self, input_dim, adapter_dim=64):
+  def __init__(self, input_dim, adapter_dim=64, dropout_prob=0.1):
     super().__init__()
+    self.norm = nn.LayerNorm(input_dim)
     self.down_project = nn.Linear(input_dim, adapter_dim)
     self.activation = nn.GELU()
     self.up_project = nn.Linear(adapter_dim, input_dim)
+    self.dropout = nn.Dropout(dropout_prob)
+
+    # Learnable scaling factor for residual connection
+    self.scale = nn.Parameter(torch.tensor(1e-3))
 
     # Initialize with small weights
     nn.init.normal_(self.down_project.weight, std=1e-3)
@@ -22,11 +27,15 @@ class Adapter(nn.Module):
     nn.init.zeros_(self.up_project.bias)
 
   def forward(self, x):
-    # Down-project, activate, up-project
-    down = self.down_project(x)
+    # Normalize, project down, activate, project up, apply dropout
+    x_norm = self.norm(x)
+    down = self.down_project(x_norm)
     activated = self.activation(down)
     up = self.up_project(activated)
-    return up
+    dropped = self.dropout(up)
+
+    # Scale and return residual connection
+    return self.scale * dropped
 
 
 # Create a PTM prediction model with adapters
@@ -53,7 +62,7 @@ class PTMAdapterModel(nn.Module):
     results = self.esm_model(tokens, repr_layers=[33], return_contacts=False)
     token_representations = results["representations"][33]
 
-    # Pass through adapter
+    # Pass through adapter with residual connection
     adapted_representations = token_representations + self.adapter(token_representations)
 
     # Apply classification head to each position
@@ -67,4 +76,11 @@ num_ptm_classes = 10  # No modification + 9 different PTM types
 ptm_model = PTMAdapterModel(esm_model, num_ptm_classes)
 
 # Only train the adapters and classification head
-optimizer = torch.optim.Adam([{"params": ptm_model.adapter.parameters()}, {"params": ptm_model.ptm_classifier.parameters()}], lr=1e-4)
+optimizer = torch.optim.Adam(
+  [
+    {"params": ptm_model.adapter.parameters()},
+    {"params": ptm_model.ptm_classifier.parameters()},
+  ],
+  lr=1e-4,
+  weight_decay=1e-2,  # <-- Apply weight decay
+)
