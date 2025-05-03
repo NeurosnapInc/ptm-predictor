@@ -26,9 +26,11 @@ from statistics import fmean, stdev
 
 x = []
 y = []
+dfs = []
 for fname in os.listdir("ptms_clean"):
   if fname.endswith(".csv"):  # Optional: only process .csv files
     df = pd.read_csv(f"ptms_clean/{fname}")
+    dfs.append(df)
     x.append(fname)
     y.append(len(df))
 
@@ -54,3 +56,9 @@ bar_fig.show()
 hist_fig = px.histogram(y, nbins=20, title="Distribution of Entry Counts Across PTM Files")
 hist_fig.update_layout(xaxis_title="Number of Entries", yaxis_title="Frequency")
 hist_fig.show()
+
+# this code reveals major flaws in the database
+df = pd.concat(dfs, ignore_index=True)
+filtered = df[df['seq'].str.len() < df['ptm_location']]
+print(filtered)
+print((len(filtered)/len(df))*100)
