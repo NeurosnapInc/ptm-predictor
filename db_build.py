@@ -26,7 +26,7 @@ def get_next_link(link_header):
 # NOTE: Might be faster to switch to rest.uniprot.org/uniprotkb/stream endpoint
 url = "https://rest.uniprot.org/uniprotkb/search"
 params = {
-  "query": "(cc_ptm:* OR ft_mod_res:*)",
+  "query": "(cc_ptm:* OR ft_mod_res:* OR ft_lipid:*)",
   "format": "json",
   "size": 500,
 }
