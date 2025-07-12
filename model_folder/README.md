@@ -1,0 +1,5 @@
+- utils: Contains utility python files
+- models: Contains model python file
+- data: Place your train.csv, val.csv, test.csv here
+- train.py: Train script
+- test_scripts.ipynb: For testing that this setup works
