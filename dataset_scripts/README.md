@@ -1,4 +1,4 @@
-download_uniprot.py: file to download PTM dataset from Uniprot
-data_splitter.ipynb: file to split the PTM dataset into the different PTM types
-data_processing.ipynb: file to process the PTM dataset
-data_combination.ipynb: file to combine specific PTM csvs into usable form for model
+- download_uniprot.py: file to download PTM dataset from Uniprot
+- data_splitter.ipynb: file to split the PTM dataset into the different PTM types
+- data_processing.ipynb: file to process the PTM dataset
+- data_combination.ipynb: file to combine specific PTM csvs into usable form for model
